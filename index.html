@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<body>
+<body onload="displayPokemon(0, 30)">
     <div id="overlay" class="overlay" style="display: none;"></div>
     <div id="pokemon-details" class="pokemon-details-container" style="display: none;"></div>
     <header class="main-header">
         <div class="header-content">
-            <img src="img\pokeball.png" alt="Pokeball" class="header-icon">
+            <img src="img/pokeball.png" alt="Pokeball" class="header-icon">
             <h1 class="header-title">Pokédex</h1>
         </div>
     </header>
@@ -29,13 +29,12 @@
             </div>
             <div id="pokemon-grid" class="pokemon-grid"></div>
             <div class="footer">
-                <button id="load-more" class="btn btn-primary">Load More</button>
+                <button id="load-more" class="btn btn-primary" onclick="loadMorePokemon()">Load More</button>
             </div>
         </div>
-        <div id="pokemon-details" class="pokemon-details"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <script src="scripts.js"></script>
 </body>
 
 </html>
