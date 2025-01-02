@@ -358,6 +358,7 @@ body {
     border-radius: inherit;
     color: black;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    height: 298px;
 }
 
 .tabs {
@@ -367,15 +368,10 @@ body {
 
 .tab-button {
     flex: 1;
-    padding: 10px;
     background: #f0f0f0;
     border: none;
     cursor: pointer;
     transition: background 0.3s;
-}
-
-.tab-button.active {
-    background: #d0d0d0;
 }
 
 .tab-button.active::after {
@@ -515,40 +511,38 @@ body {
     flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 3px;
+    width: 100%;
+    padding: 20px;
+    min-height: 200px;
 }
 
 .evolution {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
     cursor: pointer;
     transition: transform 0.3s ease;
     min-width: 100px;
     text-align: center;
+    flex: 1;
+    max-width: 120px;
 }
 
 .evolution-image {
     width: 96px;
     height: 96px;
     object-fit: contain;
+    margin-bottom: 8px;
 }
 
-.evolution-name {
-    margin-bottom: 5px;
-    color: black;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.evolution-level {
-    font-size: 0.9rem;
-    color: black;
-    margin-top: 5px;
-    display: block;
+.level-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    text-align: center;
 }
 
 .navigation {
@@ -722,6 +716,19 @@ body {
     display: none;
 }
 
+.error-message {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ff4444;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 @keyframes rotate {
     from {
         transform: rotate(0deg);
@@ -729,30 +736,6 @@ body {
 
     to {
         transform: rotate(360deg);
-    }
-}
-
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.7;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
     }
 }
 
@@ -812,25 +795,25 @@ body {
     }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 478px) {
 
     .h2,
     h2 {
         margin-left: 16px;
     }
 
-
     .evolution-container {
-        gap: 0px;
-        justify-content: space-evenly;
+        padding: 10px;
+        gap: 10px;
     }
 
     .evolution {
         min-width: 80px;
+        max-width: 100px;
     }
 
     #pokemon-details {
-        width: 100%;
+        width: 98%;
         padding-inline: inherit;
     }
 
@@ -842,14 +825,16 @@ body {
         margin-left: 8px;
     }
 
-    .details-container-background {
-        border-radius: 0%;
-    }
-
     .level-container {
         width: 83px;
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+}
+
+@media (max-width: 478px) {
+    .evolution-container {
+        gap: 0px;
     }
 }

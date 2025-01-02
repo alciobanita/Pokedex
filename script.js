@@ -16,41 +16,12 @@ window.loadMorePokemon = async function () {
     }
 };
 
-async function fetchPokemonList(offset, limit) {
-    try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data.results;
-    } catch (error) {
-        console.error('Error fetching Pokemon list:', error);
-        return [];
-    }
-}
-
-async function fetchDetailedPokemon(pokemon) {
-    try {
-        const pokemonResponse = await fetch(pokemon.url);
-        if (!pokemonResponse.ok) {
-            throw new Error(`HTTP error! status: ${pokemonResponse.status}`);
-        }
-        const pokemonData = await pokemonResponse.json();
-        pokemonDataMap.set(pokemonData.id, pokemonData);
-        return pokemonData;
-    } catch (error) {
-        console.error('Error fetching detailed Pokemon:', error);
-        return null;
-    }
-}
-
 async function fetchPokemon(offset, limit) {
     const loadingScreen = document.getElementById('loading-screen');
     loadingScreen.style.display = 'flex';
 
     try {
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
         const pokemonList = await fetchPokemonList(offset, limit);
         return await Promise.all(pokemonList.map(fetchDetailedPokemon));
     } catch (error) {
@@ -58,45 +29,6 @@ async function fetchPokemon(offset, limit) {
     } finally {
         loadingScreen.style.display = 'none';
     }
-}
-
-function createCardElement() {
-    const card = document.createElement('div');
-    card.classList.add('col');
-    return card;
-}
-
-function createCardInner(typeColors) {
-    const cardInner = document.createElement('div');
-    cardInner.classList.add('pokemon-card', 'd-flex', 'flex-column', 'align-items-center', 'p-3');
-    setCardBackground(cardInner, typeColors);
-    return cardInner;
-}
-
-function setCardBackground(cardInner, typeColors) {
-    if (typeColors.length > 1) {
-        cardInner.style.background = `linear-gradient(135deg, ${typeColors.join(', ')})`;
-    } else {
-        cardInner.style.background = `linear-gradient(135deg, ${typeColors[0]}, rgba(255, 255, 255, 0.1))`;
-    }
-    setCardBorderAndStyle(cardInner, typeColors);
-}
-
-function setCardBorderAndStyle(cardInner, typeColors) {
-    cardInner.style.border = '3px solid transparent';
-    cardInner.style.backgroundClip = 'padding-box';
-    cardInner.style.position = 'relative';
-    cardInner.style.borderRadius = '10px';
-    cardInner.style.setProperty('--border-gradient',
-        `linear-gradient(135deg, black, ${typeColors.join(', ')})`);
-}
-
-function createPokemonImage(pokemon) {
-    const image = document.createElement('img');
-    image.src = pokemon.sprites.front_default;
-    image.alt = pokemon.name;
-    image.classList.add('pokemon-image');
-    return image;
 }
 
 function createPokemonInfo(pokemon) {
@@ -141,31 +73,6 @@ function createTypeLabel(type) {
     return typeLabel;
 }
 
-function createPokemonCard(pokemon) {
-    const typeColors = pokemon.types.map(type => `var(--${type.type.name}-light)`);
-    const card = createCardElement();
-    const cardInner = createCardInner(typeColors);
-    cardInner.appendChild(createPokemonImage(pokemon));
-    cardInner.appendChild(createPokemonInfo(pokemon));
-    card.appendChild(cardInner);
-    cardInner.addEventListener('click', () => displayPokemonDetails(pokemon));
-    return card;
-}
-
-async function fetchEvolutionChain(pokemonId) {
-    try {
-        const speciesResponse = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}/`);
-        const speciesData = await speciesResponse.json();
-        const evolutionChainUrl = speciesData.evolution_chain.url;
-        const evolutionResponse = await fetch(evolutionChainUrl);
-        const evolutionData = await evolutionResponse.json();
-        return { evolutionData, speciesData };
-    } catch (error) {
-        console.error('Error fetching evolution chain:', error);
-        return null;
-    }
-}
-
 function createEvolutionElement(evolution) {
     const evolutionDiv = document.createElement('div');
     evolutionDiv.classList.add('evolution');
@@ -206,11 +113,6 @@ function createEvolutionName(evolution) {
     nameElement.textContent = evolution.species.name.charAt(0).toUpperCase() + evolution.species.name.slice(1);
     nameElement.classList.add('evolution-name');
     return nameElement;
-}
-
-function getSpeciesId(evolution) {
-    const speciesUrlParts = evolution.species.url.split('/');
-    return speciesUrlParts[speciesUrlParts.length - 2];
 }
 
 function setupEvolutionClick(evolutionDiv, evolution) {
@@ -266,137 +168,6 @@ async function updatePokemonDetails(pokemon, detailsContainer) {
 function createBasicInfo(pokemon, speciesData) {
     const typesHTML = createTypesHTML(pokemon);
     return { typesHTML };
-}
-
-function createTypesHTML(pokemon) {
-    return pokemon.types.map(type => {
-        const typeName = type.type.name;
-        return `<span class="type-label type-${typeName} badge me-1">
-            ${typeName.charAt(0).toUpperCase() + typeName.slice(1)}</span>`;
-    }).join(' ');
-}
-
-function updateDetailsHTML(pokemon, typesHTML, detailsContainer) {
-    detailsContainer.innerHTML = generateDetailsHTML(pokemon, typesHTML);
-    setupTabEventListeners();
-}
-
-function generateDetailsHTML(pokemon, typesHTML) {
-    return `
-        <div class="close-button-container">
-            <button class="close-button" id="close-button">
-                <img src="img/x.png" alt="Close" class="close-icon">
-            </button>
-        </div>
-        ${createPokemonHeaderHTML(pokemon, typesHTML)}
-        ${createPokemonContentHTML(pokemon)}
-        ${createNavigationHTML()}
-    `;
-}
-
-function createPokemonHeaderHTML(pokemon, typesHTML) {
-    return `
-        <h2>${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)} 
-            <span class="pokemon-number">N°${pokemon.id}</span>
-        </h2>
-        <p class="pokemon-types">${typesHTML}</p>
-        <div class="pokemon-image-container">
-            <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" class="detail-image">
-        </div>
-    `;
-}
-
-function createPokemonContentHTML(pokemon) {
-    return `
-        <div class="details-container-background">
-            <div class="tabs">
-                <button class="tab-button active" data-tab="stats">Base Stats</button>
-                <button class="tab-button" data-tab="evolution">Evolution</button>
-                <button class="tab-button" data-tab="abilities">Abilities</button>
-                <button class="tab-button" data-tab="about">About</button>
-            </div>
-            ${createTabContentHTML(pokemon)}
-        </div>
-    `;
-}
-
-function createTabContentHTML(pokemon) {
-    return `
-        <div class="tab-content" id="tab-content">
-            <div class="tab-pane active" id="stats">
-                <div class="stats-container">
-                    ${createStatsHTML(pokemon.stats)}
-                </div>
-            </div>
-            <div class="tab-pane" id="evolution">
-                <div class="evolution-container" id="evolution-container"></div>
-            </div>
-            <div class="tab-pane" id="abilities">
-                <p>${pokemon.abilities.map(ability => ability.ability.name).join(', ')}</p>
-            </div>
-            <div class="tab-pane" id="about">
-                <p>Height: ${pokemon.height * 10} cm</p>
-                <p>Weight: ${pokemon.weight / 10} kg</p>
-            </div>
-        </div>
-    `;
-}
-
-function createNavigationHTML() {
-    return `
-        <div class="navigation">
-            <button class="nav-button" id="prev-button">
-                <img src="img/prev.png" alt="Previous Pokemon" class="nav-icon">
-            </button>
-            <button class="nav-button" id="next-button">
-                <img src="img/next.png" alt="Next Pokemon" class="nav-icon">
-            </button>
-        </div>
-    `;
-}
-
-function createStatsHTML(stats) {
-    return stats.map(stat => {
-        const { statValue, percentage, statColor, shortName, fullName } = getStatInfo(stat);
-        return `
-            <div class="stat-bar">
-                <div class="stat-label">
-                    <span class="stat-name-full">${fullName}</span>
-                    <span class="stat-name-short">${shortName}</span>
-                    : ${statValue}
-                </div>
-                <div class="bar" style="--final-width: ${percentage}%; --stat-color: ${statColor};"></div>
-            </div>
-        `;
-    }).join('');
-}
-
-function getStatInfo(stat) {
-    const statValue = stat.base_stat;
-    const maxStatValue = 410;
-    const percentage = (statValue / maxStatValue) * 100;
-    const statColor = getStatColor(statValue);
-    const fullName = stat.stat.name.charAt(0).toUpperCase() + stat.stat.name.slice(1);
-    const shortName = getShortStatName(stat.stat.name);
-    return { statValue, percentage, statColor, shortName, fullName };
-}
-
-function getStatColor(value) {
-    if (value <= 30) return 'rgb(207, 2, 2)';
-    if (value <= 50) return 'rgb(207, 193, 2)';
-    return 'rgb(10, 141, 69)';
-}
-
-function getShortStatName(statName) {
-    const shortNames = {
-        'hp': 'HP',
-        'attack': 'ATK',
-        'defense': 'DEF',
-        'special-attack': 'SP.ATK',
-        'special-defense': 'SP.DEF',
-        'speed': 'SPD'
-    };
-    return shortNames[statName] || statName;
 }
 
 function setupTabEventListeners() {
@@ -487,18 +258,6 @@ async function handleNavigation(id) {
     }
 }
 
-async function fetchPokemonData(pokemonId) {
-    try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}/`);
-        const pokemonData = await response.json();
-        pokemonDataMap.set(pokemonData.id, pokemonData);
-        return pokemonData;
-    } catch (error) {
-        console.error('Error fetching Pokemon:', error);
-        return null;
-    }
-}
-
 async function displayPokemon(offset, limit) {
     try {
         const pokemonList = await fetchPokemon(offset, limit);
@@ -531,10 +290,60 @@ function debounce(func, wait) {
 
 searchInput.addEventListener('input', debounce((e) => {
     const searchTerm = e.target.value.toLowerCase();
+    searchPokemon(searchTerm);
+}, 300));
+
+async function searchPokemon(searchTerm) {
+    try {
+        if (!searchTerm) return resetToHome();
+        prepareForSearch();
+
+        const exists = checkPokemonExists(searchTerm);
+
+        if (!exists) {
+            await fetchAndDisplayPokemon(searchTerm);
+        } else {
+            filterExistingPokemon(searchTerm);
+        }
+    } catch (error) {
+        console.error('Error searching Pokemon:', error);
+    }
+}
+
+function prepareForSearch() {
+    loadMoreButton.textContent = 'Home';
+    loadMoreButton.onclick = resetToHome;
+}
+
+function checkPokemonExists(searchTerm) {
+    return pokemonDataMap.has(Number(searchTerm)) ||
+        Array.from(pokemonDataMap.values()).some(p => p.name.includes(searchTerm));
+}
+
+async function fetchAndDisplayPokemon(searchTerm) {
+    const pokemon = await fetchPokemonData(searchTerm.toLowerCase());
+    if (pokemon) displaySinglePokemon(pokemon);
+}
+
+function displaySinglePokemon(pokemon) {
+    pokemonGrid.innerHTML = '';
+    pokemonGrid.appendChild(createPokemonCard(pokemon));
+}
+
+function filterExistingPokemon(searchTerm) {
     const pokemonCards = pokemonGrid.getElementsByClassName('col');
     Array.from(pokemonCards).forEach(card => {
         const name = card.querySelector('.pokemon-name').textContent.toLowerCase();
         const number = card.querySelector('.pokemon-number').textContent.toLowerCase();
         card.style.display = (name.includes(searchTerm) || number.includes(searchTerm)) ? 'block' : 'none';
     });
-}, 300));
+}
+
+function resetToHome() {
+    searchInput.value = '';
+    pokemonGrid.innerHTML = '';
+    offset = 0;
+    loadMoreButton.textContent = 'Load More';
+    loadMoreButton.onclick = window.loadMorePokemon;
+    displayPokemon(0, limit);
+}
